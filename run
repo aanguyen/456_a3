@@ -1,0 +1,19 @@
+#!/bin/sh
+
+thisIp=$(hostname -I | head -n1 | awk '{print $1;}')
+nfePort=$1
+topo=$2
+routers=$3
+
+tmux new-session -d
+tmux send-keys "python3 nfe.py $thisIp $nfePort $topo" C-m
+sleep .4
+tmux split-window -h
+for i in $(seq 1 $routers)
+do
+    tmux send-keys "./virtualrouter.sh $thisIp $nfePort $i > logs/out$i &" C-m
+    # tmux send-keys "./virtualrouter.sh $thisIp $nfePort $i" C-m
+    # tmux split-window -v
+    # sleep .4
+done
+tmux -2 attach-session -d
