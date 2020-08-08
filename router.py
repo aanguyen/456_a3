@@ -86,10 +86,10 @@ def main(argv):
     start_bytes = 8
     direct_link_ids = []
     for _ in num_links:
-        link_id = struct.unpack("!i", resp[start_bytes:start_bytes+4])
+        link_id = struct.unpack("!i", resp[start_bytes:start_bytes+4])[0]
         print(link_id)
         start_bytes += 4
-        link_cost = struct.unpack("!i", resp[start_bytes:start_bytes+4])
+        link_cost = struct.unpack("!i", resp[start_bytes:start_bytes+4])[0]
         print(link_cost)
         start_bytes += 4
         lsa_msg = create_lsa_msg(this_router_id, link_id, this_router_id, link_id, link_cost)
