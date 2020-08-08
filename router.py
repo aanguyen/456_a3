@@ -143,7 +143,7 @@ def main(argv):
                     path = get_path(Pr, this_router_id, router)
                     next_hop = None if len(path) == 0 else path[0] if len(path) == 1 else path[1]
                     # Only add to routing table if a path actually exists
-                    if next_hop:
+                    if next_hop and dist != float('inf'):
                         new_routing_table[router] = (dist, int(next_hop))
 
             # Log internal topology, if necessary
