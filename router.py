@@ -55,6 +55,7 @@ def main(argv):
     # Internal router topology of the network
     # We will store this in the form:
     # this router id: [destination router id, link id connecting 2 routers, cost of this link]
+    # We store it in this way because this is the order it will be printed int the topology, making logging easier.
     internal_topology = {this_router_id: []}
     # Send init message
     udp_socket = socket(AF_INET, SOCK_DGRAM)
@@ -152,7 +153,7 @@ def main(argv):
                     sys.stdout.flush()
                     for router in internal_topology:
                         for connect in internal_topology[router]:
-                            print(f"router:{router},router{connect[0]},linkid:{connect[1]},cost:{connect[2]}", file=f)
+                            print(f"router:{router},router:{connect[0]},linkid:{connect[1]},cost:{connect[2]}", file=f)
                             sys.stdout.flush()
             topology_update = False
 
