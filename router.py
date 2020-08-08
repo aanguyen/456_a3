@@ -92,6 +92,7 @@ def main(argv):
         link_cost = struct.unpack("!i", resp[start_bytes:start_bytes+4])[0]
         start_bytes += 4
         lsa_msg = create_lsa_msg(this_router_id, link_id, this_router_id, link_id, link_cost)
+        print(f"Sending(E):{lsa_to_string(this_router_id, link_id, this_router_id, link_id, link_cost)}")
         udp_socket.sendto(lsa_msg, (nfe_ip, nfe_port))
         known_lsas.add((this_router_id, link_id, link_cost))
         unfulfilled[link_id] = (this_router_id, link_cost)
@@ -115,7 +116,7 @@ def main(argv):
             for link in direct_link_ids:
                 lsa_msg = create_lsa_msg(this_router_id, link, router_id, router_link_id, router_link_cost)
                 udp_socket.sendto(lsa_msg, (nfe_ip, nfe_port))
-                print(f"Sending:{lsa_to_string(this_router_id, link, router_id, router_link_id, router_link_cost)}")
+                print(f"Sending(F):{lsa_to_string(this_router_id, link, router_id, router_link_id, router_link_cost)}")
                 sys.stdout.flush()
             # Add this LSA to our internal topology
             if router_link_id in unfulfilled:
