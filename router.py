@@ -87,8 +87,10 @@ def main(argv):
     direct_link_ids = []
     for _ in num_links:
         link_id = struct.unpack("!i", resp[start_bytes:start_bytes+4])
+        print(link_id)
         start_bytes += 4
         link_cost = struct.unpack("!i", resp[start_bytes:start_bytes+4])
+        print(link_cost)
         start_bytes += 4
         lsa_msg = create_lsa_msg(this_router_id, link_id, this_router_id, link_id, link_cost)
         udp_socket.sendto(lsa_msg, (nfe_ip, nfe_port))
