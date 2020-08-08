@@ -143,7 +143,7 @@ def main(argv):
             topology_update = False
 
             # Log routing table (shortest distances), if necessary
-            if new_routing_table != routing_table
+            if new_routing_table != routing_table:
                 with open(f"routingtable_{this_router_id}.out", "a") as f:
                     print("ROUTING", file=f)
                     for node in new_routing_table:
