@@ -41,7 +41,7 @@ def read_lsa(data):
 
 # Helper function to print out our LSAs in the debug logs
 def lsa_to_string(sender_id, sender_link_id, router_id, router_link_id, router_link_cost):
-    return f" sender: {sender_id}, link: {sender_link_id}, router: {router_id}, router_link:{router_link_id}, link cost:{router_link_cost}"
+    return f"SID({sender_id}),SLID({sender_link_id}),RID({router_id}),RLID({router_link_id}),LC({router_link_cost})"
 
 
 def main(argv):
