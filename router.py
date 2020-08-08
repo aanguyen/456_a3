@@ -141,18 +141,23 @@ def main(argv):
             if topology_update:
                 with open(f"topology_{this_router_id}.out", "a") as f:
                     print("TOPOLOGY", file=f)
+                    sys.stdout.flush()
                     for router in internal_topology:
                         for connect in internal_topology[router]:
                             print(f"router:{router},router{connect[0]},linkid:{connect[1]},cost:{connect[2]}", file=f)
+                            sys.stdout.flush()
             topology_update = False
 
             # Log routing table (shortest distances), if necessary
             if new_routing_table != routing_table:
                 with open(f"routingtable_{this_router_id}.out", "a") as f:
                     print("ROUTING", file=f)
+                    sys.stdout.flush()
                     for node in new_routing_table:
                         print(f"{node}:{new_routing_table[node][0]},{new_routing_table[node][1]}", file=f)
+                        sys.stdout.flush()
                     print(f"Keys:{len(new_routing_table.keys())}")
+                    sys.stdout.flush()
                 routing_table = new_routing_table
 
             # Once we finish processing it add this to the known LSAs list
