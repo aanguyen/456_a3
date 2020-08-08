@@ -149,6 +149,7 @@ def main(argv):
                     print("ROUTING", file=f)
                     for node in new_routing_table:
                         print(f"{node}:{new_routing_table[node][0]},{new_routing_table[node][1]}", file=f)
+                    print(f"Keys:{len(new_routing_table.keys())}")
                 routing_table = new_routing_table
 
             # Once we finish processing it add this to the known LSAs list
