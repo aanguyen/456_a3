@@ -83,7 +83,7 @@ def main(argv):
     # Keep a set of unfulfilled links
     unfulfilled = {}
     # Send out edges in init-reply to immediate neighbours
-    num_links = struct.unpack("!i", resp[4:8])
+    num_links = struct.unpack("!i", resp[4:8])[0]
     start_bytes = 8
     direct_link_ids = []
     print(f"Num links {num_links}")
