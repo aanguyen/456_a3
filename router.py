@@ -166,6 +166,7 @@ def main(argv):
                         # For some reason the infinity distances aren't being caught before.
                         # Catch them here.
                         if str(new_routing_table[node][0]) != "inf":
+                            print(str(new_routing_table[node][0]))
                             print(f"{node}:{new_routing_table[node][1]},{new_routing_table[node][0]}", file=f)
                             sys.stdout.flush()
                 routing_table = new_routing_table
