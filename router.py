@@ -86,6 +86,7 @@ def main(argv):
     num_links = struct.unpack("!i", resp[4:8])
     start_bytes = 8
     direct_link_ids = []
+    print(f"Num links {num_links}")
     for _ in num_links:
         link_id = struct.unpack("!i", resp[start_bytes:start_bytes+4])[0]
         start_bytes += 4
