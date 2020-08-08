@@ -35,11 +35,11 @@ def dijkstra(adjacency, target):
 
 def create_lsa_msg(sender_id, sender_link_id, router_id, router_link_id, router_link_cost):
     return (struct.pack("!i", 3) +
-            struct.pack("!i", sender_id) +
-            struct.pack("!i", sender_link_id) +
-            struct.pack("!i", router_id) +
-            struct.pack("!i", router_link_id) +
-            struct.pack("!i", router_link_cost)
+            struct.pack("!i", int(sender_id)) +
+            struct.pack("!i", int(sender_link_id)) +
+            struct.pack("!i", int(router_id)) +
+            struct.pack("!i", int(router_link_id)) +
+            struct.pack("!i", int(router_link_cost))
             )
 
 
@@ -110,7 +110,7 @@ def main(argv):
         else:
             # Send the LSA from this router across all direct links to this router
             for link in direct_link_ids:
-                lsa_msg = create_lsa_msg(this_router_id, link, router_id, int(router_link_id), router_link_cost)
+                lsa_msg = create_lsa_msg(this_router_id, link, router_id, router_link_id, router_link_cost)
                 udp_socket.sendto(lsa_msg, (nfe_ip, nfe_port))
                 print(f"Sending:{lsa_to_string(this_router_id, link, router_id, router_link_id, router_link_cost)}")
             # Add this LSA to our internal topology
