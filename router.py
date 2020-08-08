@@ -11,7 +11,6 @@ def dijkstra(adjacency, target):
     visited = set()
     q = [(0, target)]
 
-    sys.stdout.flush()
     # cost, id
     while q:
         cur = heapq.heappop(q)
@@ -64,12 +63,13 @@ def main(argv):
     nfe_ip = argv[1]
     nfe_port = int(argv[2])
     this_router_id = int(argv[3])
+    print(f"INITIALIZED ROUTER {this_router_id}")
+    sys.stdout.flush()
 
     # Internal router topology of the network
     # We will store this in the form:
     # this router id: [destination router id, link id connecting 2 routers, cost of this link]
     internal_topology = {this_router_id: []}
-    print(f"INITIALIZED ROUTER {this_router_id}")
     # Send init message
     udp_socket = socket(AF_INET, SOCK_DGRAM)
     init_msg = struct.pack("!i", 1) + struct.pack("!i", this_router_id)
@@ -104,16 +104,19 @@ def main(argv):
         resp, _ = udp_socket.recvfrom(4096)
         sender_id, sender_link_id, router_id, router_link_id, router_link_cost = read_lsa(resp)
         print(f"Received:{lsa_to_string(sender_id, sender_link_id, router_id, router_link_id, router_link_cost)}")
+        sys.stdout.flush()
 
         if (router_id, router_link_id, router_link_cost) in known_lsas:
             # Drop it if we've already seen it
             print(f"Dropping:{lsa_to_string(sender_id, sender_link_id, router_id, router_link_id, router_link_cost)}")
+            sys.stdout.flush()
         else:
             # Send the LSA from this router across all direct links to this router
             for link in direct_link_ids:
                 lsa_msg = create_lsa_msg(this_router_id, link, router_id, router_link_id, router_link_cost)
                 udp_socket.sendto(lsa_msg, (nfe_ip, nfe_port))
                 print(f"Sending:{lsa_to_string(this_router_id, link, router_id, router_link_id, router_link_cost)}")
+                sys.stdout.flush()
             # Add this LSA to our internal topology
             if router_link_id in unfulfilled:
                 # If unfulfilled, then we update topology to include a new node
@@ -154,7 +157,6 @@ def main(argv):
 
             # Once we finish processing it add this to the known LSAs list
             known_lsas.add((router_id, router_link_id, router_link_cost))
-            sys.stdout.flush()
 
 
 if __name__ == '__main__':
