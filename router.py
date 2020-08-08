@@ -2,35 +2,19 @@
 import sys
 import struct
 from socket import *
-import heapq
+import numpy as np
+from scipy.sparse.csgraph import shortest_path
 
 
-def dijkstra(adjacency, target):
-    dist = {vert: (float("inf"), None) for vert in adjacency}
-    dist[target] = (0, 0)
-    visited = set()
-    q = [(0, target)]
-
-    # cost, id
-    while q:
-        cur = heapq.heappop(q)
-        cur_id = cur[1]
-        visited.add(cur_id)
-
-        sys.stdout.flush()
-        for edge_data in adjacency[cur_id]:
-            edge_cost = edge_data[2]
-            dest = edge_data[0]
-            if dist[cur_id][0] + edge_cost < dist[dest][0]:
-                dist[dest] = (dist[cur_id][0] + edge_cost, dist[cur_id][1])
-
-                if dest not in visited:
-                    heapq.heappush(q, (dist[dest], dest))
-
-                if cur_id == target:
-                    dist[dest] = (dist[dest][0], dest)
-
-    return dist
+# Thanks to https://stackoverflow.com/questions/53074947/examples-for-search-graph-using-scipy
+# for this function.
+def get_path(Pr, i, j):
+    path = [j]
+    k = j
+    while Pr[i, k] != -9999:
+        path.append(Pr[i, k])
+        k = Pr[i, k]
+    return path[::-1]
 
 
 def create_lsa_msg(sender_id, sender_link_id, router_id, router_link_id, router_link_cost):
@@ -100,7 +84,7 @@ def main(argv):
         direct_link_ids.append(link_id)
 
     topology_update = False
-    routing_table = []
+    routing_table = {}
     # Always be listening to incoming LSAs
     while True:
         resp, _ = udp_socket.recvfrom(4096)
@@ -136,8 +120,21 @@ def main(argv):
             else:
                 unfulfilled[router_link_id] = (router_id, router_link_cost)
 
-            # Update our shortest distances using Dijkstras
-            new_routing_table = dijkstra(internal_topology, this_router_id)
+            # Make the matrix to pass into dijkstras
+            num_nodes = len(internal_topology.keys())
+            nodes_matrix = np.zeros(shape=(num_nodes+1, num_nodes+1))
+            for router in internal_topology:
+                for link in internal_topology[router]:
+                    nodes_matrix[router, link[0]] = link[2]
+                    nodes_matrix[link[0], router] = link[2]
+
+            new_routing_table = {}
+            D, Pr = shortest_path(nodes_matrix, directed=False, method='FW', return_predecessors=True)
+            for router in internal_topology:
+                if router != this_router_id:
+                    dist = D[this_router_id, router]
+                    next_hop = get_path(Pr, this_router_id, router)[1]
+                    new_routing_table[router] = (dist, next_hop)
 
             # Log internal topology, if necessary
             if topology_update:
@@ -156,10 +153,8 @@ def main(argv):
                     print("ROUTING", file=f)
                     sys.stdout.flush()
                     for node in new_routing_table:
-                        print(f"{node}:{new_routing_table[node][0]},{new_routing_table[node][1]}", file=f)
+                        print(f"{node}:{new_routing_table[node][1]},{new_routing_table[node][0]}", file=f)
                         sys.stdout.flush()
-                    print(f"Keys:{len(new_routing_table.keys())}")
-                    sys.stdout.flush()
                 routing_table = new_routing_table
 
             # Once we finish processing it add this to the known LSAs list
