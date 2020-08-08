@@ -17,7 +17,9 @@ def get_path(Pr, i, j):
     return path[::-1]
 
 
+# Helper function to turn LSA information into a form we can pass into the socket
 def create_lsa_msg(sender_id, sender_link_id, router_id, router_link_id, router_link_cost):
+    # Remember the message type of LSAs is 3
     return (struct.pack("!i", 3) +
             struct.pack("!i", int(sender_id)) +
             struct.pack("!i", int(sender_link_id)) +
@@ -27,6 +29,7 @@ def create_lsa_msg(sender_id, sender_link_id, router_id, router_link_id, router_
             )
 
 
+# Helper function to read the LSA from raw socket data
 def read_lsa(data):
     sender_id = struct.unpack("!i", data[4:8])[0]
     sender_link_id = struct.unpack("!i", data[8:12])[0]
@@ -36,6 +39,7 @@ def read_lsa(data):
     return sender_id, sender_link_id, router_id, router_link_id, router_link_cost
 
 
+# Helper function to print out our LSAs in the debug logs
 def lsa_to_string(sender_id, sender_link_id, router_id, router_link_id, router_link_cost):
     return f" sender: {sender_id}, link: {sender_link_id}, router: {router_id}, router_link:{router_link_id}, link cost:{router_link_cost}"
 
@@ -47,8 +51,6 @@ def main(argv):
     nfe_ip = argv[1]
     nfe_port = int(argv[2])
     this_router_id = int(argv[3])
-    print(f"INITIALIZED ROUTER {this_router_id}")
-    sys.stdout.flush()
 
     # Internal router topology of the network
     # We will store this in the form:
@@ -70,7 +72,6 @@ def main(argv):
     num_links = struct.unpack("!i", resp[4:8])[0]
     start_bytes = 8
     direct_link_ids = []
-    print(f"Num links {num_links}")
     for _ in range(num_links):
         link_id = struct.unpack("!i", resp[start_bytes:start_bytes+4])[0]
         start_bytes += 4
@@ -120,15 +121,19 @@ def main(argv):
             else:
                 unfulfilled[router_link_id] = (router_id, router_link_cost)
 
-            # Make the matrix to pass into dijkstras
-            # We can afford to be inefficient here - this won't affect efficiency of our dijkstras
+            # Make the matrix to pass into floyd warshall
+            # We can afford to be inefficient here - this won't affect efficiency of our shortest path
             num_nodes = max(internal_topology)
             nodes_matrix = np.zeros(shape=(num_nodes+1, num_nodes+1))
+            # Add the links and their costs for every link in our internal_topology
             for router in internal_topology:
                 for link in internal_topology[router]:
-                    nodes_matrix[router, link[0]] = link[2]
-                    nodes_matrix[link[0], router] = link[2]
+                    dest = link[0]
+                    cost = link[2]
+                    nodes_matrix[router, dest] = cost
+                    nodes_matrix[dest, router] = cost
 
+            # Find our shortest paths
             new_routing_table = {}
             D, Pr = shortest_path(nodes_matrix, directed=False, method='FW', return_predecessors=True)
             for router in internal_topology:
@@ -138,7 +143,7 @@ def main(argv):
                     next_hop = None if len(path) == 0 else path[0] if len(path) == 1 else path[1]
                     # Only add to routing table if a path actually exists
                     if next_hop:
-                        new_routing_table[router] = (dist, next_hop)
+                        new_routing_table[router] = (dist, int(next_hop))
 
             # Log internal topology, if necessary
             if topology_update:
