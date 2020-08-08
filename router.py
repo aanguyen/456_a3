@@ -134,8 +134,11 @@ def main(argv):
             for router in internal_topology:
                 if router != this_router_id:
                     dist = D[this_router_id, router]
-                    next_hop = get_path(Pr, this_router_id, router)[1]
-                    new_routing_table[router] = (dist, next_hop)
+                    path = get_path(Pr, this_router_id, router)
+                    next_hop = None if len(path) == 0 else path[0] if len(path) == 1 else path[1]
+                    # Only add to routing table if a path actually exists
+                    if next_hop:
+                        new_routing_table[router] = (dist, next_hop)
 
             # Log internal topology, if necessary
             if topology_update:
