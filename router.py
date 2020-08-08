@@ -68,7 +68,7 @@ def main(argv):
     # We will store this in the form:
     # this router id: [destination router id, link id connecting 2 routers, cost of this link]
     internal_topology = {this_router_id: []}
-
+    print(f"INITIALIZED ROUTER {this_router_id}")
     # Send init message
     udp_socket = socket(AF_INET, SOCK_DGRAM)
     init_msg = struct.pack("!i", 1) + struct.pack("!i", this_router_id)
@@ -87,10 +87,8 @@ def main(argv):
     direct_link_ids = []
     for _ in num_links:
         link_id = struct.unpack("!i", resp[start_bytes:start_bytes+4])[0]
-        print(link_id)
         start_bytes += 4
         link_cost = struct.unpack("!i", resp[start_bytes:start_bytes+4])[0]
-        print(link_cost)
         start_bytes += 4
         lsa_msg = create_lsa_msg(this_router_id, link_id, this_router_id, link_id, link_cost)
         udp_socket.sendto(lsa_msg, (nfe_ip, nfe_port))
@@ -154,6 +152,7 @@ def main(argv):
 
             # Once we finish processing it add this to the known LSAs list
             known_lsas.add((router_id, router_link_id, router_link_cost))
+
 
 if __name__ == '__main__':
     # params:
