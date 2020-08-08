@@ -11,6 +11,7 @@ def dijkstra(adjacency, target):
     visited = set()
     q = [(0, target)]
 
+    sys.stdout.flush()
     # cost, id
     while q:
         cur = heapq.heappop(q)
@@ -152,6 +153,7 @@ def main(argv):
 
             # Once we finish processing it add this to the known LSAs list
             known_lsas.add((router_id, router_link_id, router_link_cost))
+            sys.stdout.flush()
 
 
 if __name__ == '__main__':
