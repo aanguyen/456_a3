@@ -122,7 +122,7 @@ def main(argv):
 
             # Make the matrix to pass into dijkstras
             # We can afford to be inefficient here - this won't affect efficiency of our dijkstras
-            num_nodes = len(internal_topology.keys()) + len(unfulfilled.keys())
+            num_nodes = max(internal_topology)
             nodes_matrix = np.zeros(shape=(num_nodes+1, num_nodes+1))
             for router in internal_topology:
                 for link in internal_topology[router]:
