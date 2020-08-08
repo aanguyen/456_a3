@@ -115,7 +115,6 @@ def main(argv):
                 unfulfilled_link = unfulfilled.pop(router_link_id)
                 if unfulfilled_link[0] not in internal_topology:
                     internal_topology[unfulfilled_link[0]] = []
-                # cost = unfulfilled_link[1]
                 # Add the link to EACH of the two sides it is connecting to
                 internal_topology[router_id].append([unfulfilled_link[0], router_link_id, router_link_cost])
                 internal_topology[unfulfilled_link[0]].append([router_id, router_link_id, router_link_cost])
