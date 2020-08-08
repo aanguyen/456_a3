@@ -121,7 +121,8 @@ def main(argv):
                 unfulfilled[router_link_id] = (router_id, router_link_cost)
 
             # Make the matrix to pass into dijkstras
-            num_nodes = len(internal_topology.keys())
+            # We can afford to be inefficient here - this won't affect efficiency of our dijkstras
+            num_nodes = len(internal_topology.keys()) + len(unfulfilled.keys())
             nodes_matrix = np.zeros(shape=(num_nodes+1, num_nodes+1))
             for router in internal_topology:
                 for link in internal_topology[router]:
